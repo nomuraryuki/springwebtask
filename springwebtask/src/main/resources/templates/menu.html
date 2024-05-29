@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>メニュー</title>
+<link href="css/commons.css" rel="stylesheet">
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+<!--    <th:block th:insert="common/header"></th:block>-->
+    <div class="header">
+      <h1 class="site_logo"><a href="menu.html">商品管理システム</a></h1>
+      <div class="user">
+        <p class="user_name">[[ ${session.user.name} ]]さん、こんにちは</p>
+        <form class="logout_form" action="logout.html" method="get">
+          <button class="custom-btn" type="submit">
+            <img th:src="@{/img/ドアアイコン.png}">ログアウト</button>
+        </form>
+      </div>
+    </div>
+    <hr>
+
+    <div class="btn-area">
+      <div class="btn"><a class="basic-btn regist" href="/insert">新規登録</a></div>
+      <div class="btn"><a class="basic-btn regist" href="category.html">カテゴリ管理</a></div>
+    </div>
+    <p>成功メッセージ</p>
+    <form method="get" action="#" class="search-form">
+      <div class="order">
+        <select name="order" class="base-text">
+          <option>並び替え</option>
+          <option>商品ID：昇順</option>
+          <option>商品ID：降順</option>
+          <option>カテゴリ：昇順</option>
+          <option>カテゴリ：降順</option>
+          <option>単価：安い順</option>
+          <option>単価：高い順</option>
+        </select>
+      </div>
+      <div class="search-container">
+        <input type="text" name="keyword" size="25" placeholder="キーワード検索">
+        <input type="submit" value="&#xf002">
+      </div>
+    </form>
+
+    <table>
+        <div class="caption"><p>検索結果：10件</p></div>
+        
+      <thead>
+        <tr>
+          <th>商品ID</th>
+          <th>商品名</th>
+          <th>単価</th>
+          <th>カテゴリ</th>
+          <th>詳細</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="product : ${productList}">
+          <td th:text="${product.product_id}"></td>
+          <td th:text="${product.name}"></td>
+          <td th:text="${product.price}"></td>
+          <td th:text="${product.category}"></td>
+          <td><a class="detail_btn" href="./detail.html">詳細</a></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+  <footer></footer>
+
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>商品登録</title>
+<link href="css/commons.css" rel="stylesheet">
+</head>
+<body>
+
+  <div class="header">
+    <h1 class="site_logo"><a href="menu.html">商品管理システム</a></h1>
+    <div class="user">
+      <p class="user_name">佐藤さん、こんにちは</p>
+      <form class="logout_form" action="logout.html" method="get">
+        <button class="custom-btn" type="submit">
+          <img src="images/ドアアイコン.png">ログアウト</button>
+      </form>
+    </div>
+  </div>
+
+  <hr>
+  
+  <div class="insert">
+    <div class="discription">
+      <p>
+        登録情報を入力してください（<span class="required"></span>は必須です）
+      </p>
+    </div>
+  
+    <div class="form-body">
+      <p class="error">エラーメッセージ</p>
+  
+      <form action="insert" method="post" th:object="${addProductForm}">
+        <fieldset class="label-130">
+          <div>
+            <label class="required">商品ID</label>
+            <input type="text" th:field="*{addProductPid}" name="productId" class="base-text">
+            <div class="error" th:each="error: ${#fields.errors('addProductPid')}">
+              [[ ${error} ]]
+            </div>
+          </div>
+          <div>
+            <label class="required">商品名</label>
+            <input type="text" th:field="*{addProductName}" name="name" class="base-text">
+            <div class="error" th:each="error: ${#fields.errors('addProductName')}">
+              [[ ${error} ]]
+            </div>
+          </div>
+          <div>
+            <label class="required">単価</label>
+            <input type="text" th:field="*{addProductPrice}" name="price" class="base-text">
+            <div class="error" th:each="error: ${#fields.errors('addProductPrice')}">
+              [[ ${error} ]]
+            </div>
+          </div>
+          <div class="select_block">
+            <label class="required">カテゴリ</label>
+            <select name="categoryId" class="base-text">
+              <option th:each="categories : ${categoriesList}" th:value="${categories.id}" th:text="${categories.name}"></option>
+            </select>
+          </div>
+          <div>
+            <label>商品説明</label>
+            <textarea name="description" class="base-text"></textarea>
+          </div>
+          <div>
+            <label>画像</label>
+            <input type="file" name="file">
+            <span class="error">エラーメッセージ</span>
+          </div>
+        </fieldset>
+        <div class="btns">
+          <button type="button" onclick="openModal()" class="basic-btn">登録</button>
+          <input type="button" onclick="location.href='./menu.html'" value="戻る" class="cancel-btn">
+        </div>
+        <div id="modal">
+          <p class="modal-message">登録しますか？</p>
+          <div class="btns">
+            <button type="submit" id="register-btn" class="basic-btn">登録</button>
+            <button type="button" onclick="closeModal()" class="cancel-btn">キャンセル</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="fadeLayer"></div>
+  <script src="./js/commons.js"></script>
+  <script>
+    'use strict'
+    document.getElementById('register-btn').addEventListener('click', () => {
+      location.href = './menu.html'
+    })
+  </script>
+</body>
+</html>
