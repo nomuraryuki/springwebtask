@@ -1,6 +1,7 @@
 package com.example.springwebtask.form;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -10,6 +11,7 @@ import org.hibernate.validator.constraints.Range;
 public class AddProductForm {
 
     @NotEmpty
+    @Pattern(regexp="[0-9]{5}", message = "{Product.Pid.pattern}")
     private String addProductPid;
 
     @NotEmpty(message = "{Product.Name.Null}")
@@ -23,8 +25,9 @@ public class AddProductForm {
     @Positive(message = "{Product.Price.Positive}")
     private String addProductPrice;
 
-    @Range(max=2000)
+    @Length(min=0, max=2000)
     private String addProductDescription;
 
+    private String addProductCid;
 
 }

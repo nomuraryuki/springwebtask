@@ -11,10 +11,14 @@ public interface ProductDao {
 
     ProductRecord findById(int id);
 
+//    ProductRecord checkProductName(String name);
+
     int insert(InsertProduct insertProduct);
     int update(ProductRecord productRecord);
 
     int delete(int id);
+
+    List<ProductRecord> searchName(String name);
 
 
 }

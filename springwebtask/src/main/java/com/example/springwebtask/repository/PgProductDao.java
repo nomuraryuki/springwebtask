@@ -26,6 +26,7 @@ public class PgProductDao implements ProductDao{
         param.addValue("id", id);
         var list = jdbcTemplate.query("SELECT * FROM products WHERE id = :id", param, new DataClassRowMapper<>(ProductRecord.class));
         return list.isEmpty() ? null : list.get(0);
+
     }
 
     @Override
@@ -36,11 +37,14 @@ public class PgProductDao implements ProductDao{
         param.addValue("category_id", insertProduct.category_id());
         param.addValue("name", insertProduct.name());
         param.addValue("price", insertProduct.price());
+        param.addValue("description", insertProduct.description());
 
 //        return jdbcTemplate.update("INSERT INTO products (product_id,category_id,name,price,description) VALUES( :product_id,:category_id,:name,:price,:description)", param);
-
-        return jdbcTemplate.update("INSERT INTO products (product_id,category_id,name,price) VALUES( :product_id,:category_id,:name,:price)", param);
-
+        try {
+            return jdbcTemplate.update("INSERT INTO products (product_id,category_id,name,price,description) VALUES( :product_id,:category_id,:name,:price,:description)", param);
+        }catch (RuntimeException e){
+            return -1;
+        }
 
     }
 
@@ -62,5 +66,17 @@ public class PgProductDao implements ProductDao{
         param.addValue("id", id);
 
         return jdbcTemplate.update("DELETE from products WHERE id = :id", param);
+    }
+
+    @Override
+    public List<ProductRecord> searchName(String name){
+        var param = new MapSqlParameterSource();
+
+        param.addValue("name", "%"+name+"%");
+
+        var list = jdbcTemplate.query("SELECT products.id, product_id, categories.name AS category, products.name AS name, price, description FROM products JOIN categories ON category_id = categories.id WHERE products.name LIKE :name ORDER BY id;", param
+            ,new DataClassRowMapper<>(ProductRecord.class));
+        System.out.println(list);
+        return list.isEmpty() ? null : list;
     }
 }

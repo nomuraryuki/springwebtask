@@ -17,7 +17,7 @@ public record InsertProduct(
         String name,
 
 //        @NotNull(message = "Product.Price.Null")
-        int price
-//        String description
+        int price,
+        String description
 ){
 }

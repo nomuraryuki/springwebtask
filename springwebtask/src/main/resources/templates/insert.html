@@ -6,17 +6,7 @@
 <link href="css/commons.css" rel="stylesheet">
 </head>
 <body>
-
-  <div class="header">
-    <h1 class="site_logo"><a href="menu.html">商品管理システム</a></h1>
-    <div class="user">
-      <p class="user_name">佐藤さん、こんにちは</p>
-      <form class="logout_form" action="logout.html" method="get">
-        <button class="custom-btn" type="submit">
-          <img src="images/ドアアイコン.png">ログアウト</button>
-      </form>
-    </div>
-  </div>
+  <th:block th:insert="common/header"></th:block>
 
   <hr>
   
@@ -28,7 +18,7 @@
     </div>
   
     <div class="form-body">
-      <p class="error">エラーメッセージ</p>
+      <p class="error" th:text="${errorMessage}"></p>
   
       <form action="insert" method="post" th:object="${addProductForm}">
         <fieldset class="label-130">
@@ -55,23 +45,29 @@
           </div>
           <div class="select_block">
             <label class="required">カテゴリ</label>
-            <select name="categoryId" class="base-text">
-              <option th:each="categories : ${categoriesList}" th:value="${categories.id}" th:text="${categories.name}"></option>
+            <select name="categoryId" class="base-text" th:field="*{addProductCid}">
+<!--              <option th:each="categories : ${categoriesList}" th:value="${categories.id}" th:text="${categories.name}"></option>-->
+              <option th:each="categories : ${categoriesList}" th:value="${categories.id}" >[[ ${categories.name} ]]</option>
+<!--              <input  type="hidden" th:each="categories : ${categoriesList}" th:field="*{addProductCid}" th:value="${categories.id}" />-->
+
             </select>
           </div>
           <div>
             <label>商品説明</label>
-            <textarea name="description" class="base-text"></textarea>
+            <textarea name="description" th:field="*{addProductDescription}" class="base-text"></textarea>
           </div>
           <div>
             <label>画像</label>
             <input type="file" name="file">
-            <span class="error">エラーメッセージ</span>
+<!--            <span class="error">エラーメッセージ</span>-->
+            <div class="error" th:each="error: ${#fields.errors('addProductDescription')}">
+              [[ ${error} ]]
+            </div>
           </div>
         </fieldset>
         <div class="btns">
           <button type="button" onclick="openModal()" class="basic-btn">登録</button>
-          <input type="button" onclick="location.href='./menu.html'" value="戻る" class="cancel-btn">
+          <input type="button" onclick="location.href='./menu'" value="戻る" class="cancel-btn">
         </div>
         <div id="modal">
           <p class="modal-message">登録しますか？</p>
@@ -88,7 +84,7 @@
   <script>
     'use strict'
     document.getElementById('register-btn').addEventListener('click', () => {
-      location.href = './menu.html'
+      location.href = './menu'
     })
   </script>
 </body>

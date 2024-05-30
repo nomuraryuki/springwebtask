@@ -12,7 +12,7 @@
 
   <div class="login-form">
     <img th:src="@{/img/logo.png}"class="login-logo">
-    <p class="error">エラーメッセージ</p>
+    <p class="error" th:text="${errorLogin}"></p>
 
     <form action="/index" method="post" th:object="${loginUserForm}">
       <fieldset>

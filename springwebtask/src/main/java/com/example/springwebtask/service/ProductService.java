@@ -16,4 +16,6 @@ public interface ProductService {
 
     int delete(int id);
 
+    List<ProductRecord> searchName(String name);
+
 }

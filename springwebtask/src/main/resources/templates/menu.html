@@ -8,17 +8,7 @@
 </head>
 <body>
   <div id="app">
-<!--    <th:block th:insert="common/header"></th:block>-->
-    <div class="header">
-      <h1 class="site_logo"><a href="menu.html">商品管理システム</a></h1>
-      <div class="user">
-        <p class="user_name">[[ ${session.user.name} ]]さん、こんにちは</p>
-        <form class="logout_form" action="logout.html" method="get">
-          <button class="custom-btn" type="submit">
-            <img th:src="@{/img/ドアアイコン.png}">ログアウト</button>
-        </form>
-      </div>
-    </div>
+    <th:block th:insert="common/header"></th:block>
     <hr>
 
     <div class="btn-area">
@@ -26,7 +16,7 @@
       <div class="btn"><a class="basic-btn regist" href="category.html">カテゴリ管理</a></div>
     </div>
     <p>成功メッセージ</p>
-    <form method="get" action="#" class="search-form">
+    <form  method="post" th:object="${SearchProductNameFrom}" action="/menu"  class="search-form">
       <div class="order">
         <select name="order" class="base-text">
           <option>並び替え</option>
@@ -39,13 +29,13 @@
         </select>
       </div>
       <div class="search-container">
-        <input type="text" name="keyword" size="25" placeholder="キーワード検索">
+        <input type="text"  th:field="*{searchName}" name="keyword" size="25" placeholder="キーワード検索">
         <input type="submit" value="&#xf002">
       </div>
     </form>
 
     <table>
-        <div class="caption"><p>検索結果：10件</p></div>
+        <div class="caption"><p >検索結果：[[ ${countDB} ]]件</p></div>
         
       <thead>
         <tr>

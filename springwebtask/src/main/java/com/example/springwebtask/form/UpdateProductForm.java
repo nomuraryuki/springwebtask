@@ -13,10 +13,6 @@ public class UpdateProductForm {
     @Length(min = 1, max = 50, message="{Product.Name.length}")
     private String updateProductName;
 
-
-    //    @Digits(integer = 2147483647, fraction = 0)
-//    @Range(min=0, max=Integer.MAX_VALUE)
-//    @NotNull
     @NotEmpty(message = "{Product.Price.Null}")
     @Range(min=0, max=2147483647, message = "{Product.Price.Range}")
     @Positive(message = "{Product.Price.Positive}")

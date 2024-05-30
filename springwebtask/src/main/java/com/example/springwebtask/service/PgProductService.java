@@ -1,5 +1,6 @@
 package com.example.springwebtask.service;
 //import com.example.productweb.Exception.ProductNotFoundException;
+import com.example.springwebtask.Exception.ProductDuplicationIdException;
 import com.example.springwebtask.Exception.ProductNotFoundException;
 import com.example.springwebtask.record.InsertProduct;
 import com.example.springwebtask.record.ProductRecord;
@@ -31,7 +32,9 @@ public class PgProductService implements ProductService {
 
     @Override
     public int insert(InsertProduct insertProduct) {
-        return productDao.insert(insertProduct);
+
+        if (productDao.insert(insertProduct) == -1) throw new ProductDuplicationIdException();
+        else{return productDao.insert(insertProduct);}
     }
 
     @Override
@@ -44,4 +47,6 @@ public class PgProductService implements ProductService {
         return productDao.delete(id);
     }
 
+    @Override
+    public List<ProductRecord> searchName(String name){return productDao.searchName(name);}
 }
