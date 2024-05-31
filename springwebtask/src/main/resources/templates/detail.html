@@ -1,22 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <title>商品詳細</title>
-<link href="css/commons.css" rel="stylesheet">
+<link href="/css/commons.css" rel="stylesheet">
 </head>
 <body>
 
-  <div class="header">
-    <h1 class="site_logo"><a href="menu.html">商品管理システム</a></h1>
-    <div class="user">
-      <p class="user_name">佐藤さん、こんにちは</p>
-      <form class="logout_form" action="logout.html" method="get">
-        <button class="custom-btn" type="submit">
-          <img src="images/ドアアイコン.png">ログアウト</button>
-      </form>
-    </div>
-  </div>
+  <th:block th:insert="common/header"></th:block>
 
   <hr>
 
@@ -25,43 +16,44 @@
       <div class="img_block">
         <img src="images/マッキー.png" class="product-img"><br>
       </div>
-      <form action="delete" method="post">
+      <form th:object="${prodcutId}" th:action="@{/delete/{pId}(pId=${productId.id()})}"  method="post">
         <fieldset class="label-130 product_block">
-          <p class="error">エラーメッセージ</p>
+          <p class="error">[[ ${deleteError} ]]</p>
           <div>
             <label>商品ID</label>
-            <input type="text" name="productId" value="10001" readonly class="base-text">
+            <input type="text" name="productId" th:value="${productId.product_id()}" readonly class="base-text">
           </div>
           <div>
             <label>商品名</label>
-            <input type="text" name="name" value="マッキー(黒)" readonly class="base-text">
+            <input type="text" name="name" th:value="${productId.name()}" readonly class="base-text">
           </div>
           <div>
             <label>単価</label>
-            <input type="text" name="price" value="165" readonly class="base-text">
+            <input type="text" name="price" th:value="${productId.price()}" readonly class="base-text">
           </div>
           <div>
             <label>カテゴリ</label>
-            <input type="text" name="categoryId" value="ペン" readonly class="base-text">
+            <input type="text" name="categoryId" th:value="${productId.category()}" readonly class="base-text">
           </div>
           <div>
             <label>商品説明</label>
-            <textarea name="description" readonly class="base-text" style="background-color: rgb(209, 209, 209);">
-ゼブラ株式会社
-線の太さ：太6.0mm、細1.5～2.0mm
+            <textarea name="description" th:text="${productId.description()}" readonly class="base-text" style="background-color: rgb(209, 209, 209);">
+
             </textarea>
           </div>
         </fieldset>
         <div>
           <div class="btns">
-            <input type="button" onclick="openModal()" value="削除" class="basic-btn">
-            <input type="button" onclick="location.href='./updateInput.html'" value="編集" class="basic-btn">
-            <input type="button" onclick="location.href='./menu.html'" value="戻る" class="cancel-btn">
+            <input type="button" onclick="openModal()" th:if="${session.user.role} == 1" value="削除" class="basic-btn">
+            <a th:href="@{/updateInput/{pId}(pId=${productId.id()})}">
+              <input type="button" th:onclick="@{location.href='/updateInput/{pId}(pId=${productId.id()})'}" th:if="${session.user.role} == 1" value="編集" class="basic-btn">
+            </a>
+            <input type="button" onclick="location.href='/menu'" value="戻る" class="cancel-btn">
           </div>
           <div id="modal">
             <p class="modal-message">削除しますか？</p>
             <div class="btns">
-              <button type="button" id="delete-btn" class="basic-btn">削除</button>
+              <button type="submit" id="delete-btn" class="basic-btn">削除</button>
               <button type="button" onclick="closeModal()" class="cancel-btn">キャンセル</button>
             </div>
           </div>
@@ -70,11 +62,11 @@
     </div>
   </div>
   <div id="fadeLayer"></div>
-  <script src="./js/commons.js"></script>
+  <script src="/js/commons.js"></script>
   <script>
     'use strict'
     document.getElementById('delete-btn').addEventListener('click', () => {
-      location.href = './menu.html'
+      location.href = '/menu'
     })
   </script>
 </body>

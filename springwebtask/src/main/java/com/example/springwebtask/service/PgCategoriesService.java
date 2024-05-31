@@ -22,5 +22,8 @@ public class PgCategoriesService implements  CategoriesService{
         return categoriesDao.findAll();
     }
 
+    @Override
+    public  CategoriesRecord findIdByName(String name){return categoriesDao.findIdByName(name);}
+
 
 }

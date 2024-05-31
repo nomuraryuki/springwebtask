@@ -1,21 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <title>更新</title>
-<link href="css/commons.css" rel="stylesheet">
+<link href="/css/commons.css" rel="stylesheet">
 </head>
 <body>
-  <div class="header">
-    <h1 class="site_logo"><a href="menu.html">商品管理システム</a></h1>
-    <div class="user">
-      <p class="user_name">佐藤さん、こんにちは</p>
-      <form class="logout_form" action="logout.html" method="get">
-        <button class="custom-btn" type="submit">
-          <img src="images/ドアアイコン.png">ログアウト</button>
-      </form>
-    </div>
-  </div>
+<th:block th:insert="common/header"></th:block>
 
   <hr>
 
@@ -23,36 +14,41 @@
     <div class="form-body">
       <p class="error">エラーメッセージ</p>
 
-      <form action="menu.html" method="get">
+      <form action="menu.html" method="get" th:object="${updateProductForm}">
         <fieldset class="label-130">
           <div>
             <label>商品ID</label>
-            <input type="text" name="productId" value="10001" class="base-text">
-            <span class="error">エラーメッセージ</span>
+            <input type="text" name="productId" th:field="*{updateProductId}" class="base-text">
+            <div class="error" th:each="error: ${#fields.errors('updateProductId')}">
+              [[ ${error} ]]
+            </div>
           </div>
           <div>
             <label>商品名</label>
-            <input type="text" name="name" value="マッキー(黒)" class="base-text">
-            <span class="error">エラーメッセージ</span>
+            <input type="text" name="name" th:field="*{updateProductName}" class="base-text">
+            <div class="error" th:each="error: ${#fields.errors('updateProductName')}">
+              [[ ${error} ]]
+            </div>
           </div>
           <div>
             <label>単価</label>
-            <input type="text" name="price" value="165" class="base-text">
-            <span class="error">エラーメッセージ</span>
+            <input type="text" name="price" th:field="*{updateProductPrice}" class="base-text">
+            <div class="error" th:each="error: ${#fields.errors('updateProductPrice')}">
+              [[ ${error} ]]
+            </div>
           </div>
           <div>
-            <label>カテゴリ</label> <select name="categoryId" class="base-text">
-              <option value="1" selected>ペン</option>
-              <option value="2">ノート</option>
-              <option value="3">消しゴム</option>
-              <option value="4">のり</option>
-            </select>
+            <label>カテゴリ</label>
+            <select th:field="*{updateCategoryId}" name="categoryId" class="base-text"/>
+              <option th:each="categories : ${categoriesList}" th:value="${categories.id}" th:text="${categories.name}"></option>
+<!--            </select>-->
+<!--            <select th:field="*{updateCategoryId}"  name="categoryId" class="base-text">-->
+<!--              <option th:each="categories : ${categoriesList}" th:value="${categories.id}" th:text="${categories.name}" ></option>-->
+<!--            </select>-->
           </div>
           <div>
             <label>商品説明</label>
-            <textarea name="description" class="base-text">
-ゼブラ株式会社
-線の太さ：太6.0mm、細1.5～2.0mm
+            <textarea name="description" th:field="*{updateDescription}" class="base-text">
             </textarea>
           </div>
           <div>

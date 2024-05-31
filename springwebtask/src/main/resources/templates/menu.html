@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>メニュー</title>
-<link href="css/commons.css" rel="stylesheet">
+<link href="/css/commons.css" rel="stylesheet">
 <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
@@ -12,11 +12,13 @@
     <hr>
 
     <div class="btn-area">
-      <div class="btn"><a class="basic-btn regist" href="/insert">新規登録</a></div>
+      <div class="btn"><a class="basic-btn regist" th:if="${session.user.role} == 1" href="/insert">新規登録</a></div>
       <div class="btn"><a class="basic-btn regist" href="category.html">カテゴリ管理</a></div>
     </div>
-    <p>成功メッセージ</p>
-    <form  method="post" th:object="${SearchProductNameFrom}" action="/menu"  class="search-form">
+    <p th:text="${MenuMessage}"></p>
+
+    <span class="search-form">
+
       <div class="order">
         <select name="order" class="base-text">
           <option>並び替え</option>
@@ -28,12 +30,13 @@
           <option>単価：高い順</option>
         </select>
       </div>
-      <div class="search-container">
-        <input type="text"  th:field="*{searchName}" name="keyword" size="25" placeholder="キーワード検索">
-        <input type="submit" value="&#xf002">
-      </div>
-    </form>
-
+      <form  method="get" th:object="${SearchProductNameFrom}" action="/menu/search"  >
+        <div class="search-container">
+          <input type="text"  th:field="*{searchName}" name="keyword" size="25" placeholder="キーワード検索">
+          <input type="submit" value="&#xf002">
+        </div>
+      </form>
+    </span>
     <table>
         <div class="caption"><p >検索結果：[[ ${countDB} ]]件</p></div>
         
@@ -52,7 +55,7 @@
           <td th:text="${product.name}"></td>
           <td th:text="${product.price}"></td>
           <td th:text="${product.category}"></td>
-          <td><a class="detail_btn" href="./detail.html">詳細</a></td>
+          <td><a class="detail_btn" th:href="@{./detail/{pId}(pId=${product.id})}">詳細</a></td>
         </tr>
 
       </tbody>

@@ -7,4 +7,6 @@ import java.util.List;
 public interface CategoriesDao {
 
     List<CategoriesRecord> findAll();
+
+    CategoriesRecord findIdByName(String name);
 }

@@ -1,25 +1,28 @@
 package com.example.springwebtask.controller;
 
+import com.example.springwebtask.Exception.ProductDeleteException;
 import com.example.springwebtask.Exception.ProductDuplicationIdException;
 import com.example.springwebtask.Exception.ProductNotFoundException;
 import com.example.springwebtask.form.AddProductForm;
 import com.example.springwebtask.form.LoginUserForm;
+
 import com.example.springwebtask.form.SearchProductNameFrom;
+import com.example.springwebtask.form.UpdateProductForm;
 import com.example.springwebtask.record.InsertProduct;
+import com.example.springwebtask.record.ProductRecord;
 import com.example.springwebtask.record.SessionUserRecord;
 import com.example.springwebtask.record.UserRecord;
 import com.example.springwebtask.service.PgCategoriesService;
 import com.example.springwebtask.service.PgProductService;
 import com.example.springwebtask.service.PgUserService;
+import com.sun.net.httpserver.Authenticator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 
 import java.util.Locale;
@@ -40,6 +43,8 @@ public class ProductController {
     @Autowired
     private MessageSource messageSource;
 
+    private  String successMessage;
+
     @GetMapping("/index")
     public String index(@ModelAttribute("loginUserForm") LoginUserForm loginUserForm){
 
@@ -50,14 +55,13 @@ public class ProductController {
     public String lopin_pass(@Validated @ModelAttribute("loginUserForm") LoginUserForm loginUserForm, BindingResult bindingResult, Model model){
         try {
             var userList = pgUserService.findUser(loginUserForm.getLoginUserId(), loginUserForm.getLoginUserPassword());
-//            System.out.println(userList.password());
+
             if (bindingResult.hasErrors()) {
                 return "index";
 
             } else if (loginUserForm.getLoginUserId().equals(userList.login_id()) && loginUserForm.getLoginUserPassword().equals(userList.password())) {
-                var user = new SessionUserRecord(1, userList.login_id(), userList.name());
+                var user = new SessionUserRecord(1, userList.login_id(), userList.name(),userList.role());
                 session.setAttribute("user", user);
-//            var login_user = new UserRecord(loginUserForm.setLoginUserId(),loginUserForm.getLoginUserPassword());
                 return "redirect:/menu";
             }
 
@@ -75,24 +79,26 @@ public class ProductController {
         if(session.getAttribute("user")==null) return "redirect:/index";
 
         else {
+        model.addAttribute("MenuMessage", successMessage);
         model.addAttribute("SearchProductNameFrom", searchProductNameFrom);
         model.addAttribute("productList", pgProductService.findAll());
-            model.addAttribute("countDB", pgProductService.findAll().size());
+        model.addAttribute("countDB", pgProductService.findAll().size());
         return "menu";
         }
     }
 
-    @PostMapping("/menu")
-    public String searchName(@ModelAttribute("SearchProductNameFrom") SearchProductNameFrom searchProductNameFrom, Model model){
+    @GetMapping("/menu/search")
+    public String searchName(@RequestParam(name="searchName") String name,@ModelAttribute("SearchProductNameFrom") SearchProductNameFrom searchProductNameFrom, Model model){
 
         if(session.getAttribute("user")==null) return "redirect:/index";
 
         else {
 
-            var name = searchProductNameFrom.getSearchName();
+            name = searchProductNameFrom.getSearchName();
+
             model.addAttribute("productList", pgProductService.searchName(name));
             model.addAttribute("countDB", pgProductService.searchName(name).size());
-            return "menu";
+            return "/menu";
         }
 
     }
@@ -107,13 +113,11 @@ public class ProductController {
     }
 
     @PostMapping("/insert")
-    public String addProduct(@Validated @ModelAttribute("addProductForm") AddProductForm addProductForm, BindingResult bindingResult,Model model) {
+    public String addProduct(@Validated @ModelAttribute("addProductForm") AddProductForm addProductForm, BindingResult bindingResult, Model model) {
+        if(session.getAttribute("user")==null) return "redirect:/index";
         model.addAttribute("categoriesList", pgCategoriesService.findAll());
 
-        var category_id = addProductForm.getAddProductCid();
-        System.out.println(category_id);
         if(bindingResult.hasErrors()) {
-//            System.out.println(0);
             return "insert";
         }
         else{
@@ -125,15 +129,16 @@ public class ProductController {
             var Cid = Integer.parseInt(addProductForm.getAddProductCid());
             var insertProduct = new InsertProduct(product_id,Cid,name,price,description);
 
-//            System.out.println(1);
             try {
                 pgProductService.insert(insertProduct);
-//                System.out.println(2);
-                return "redirect:/insert";
+                successMessage = "登録が完了しました";
+//                System.out.println(successMessage);
+//                model.addAttribute("MenuMessage", successMessage);
+
+                return "redirect:/menu";
             }catch (ProductDuplicationIdException e){
                 String errorMessage = messageSource.getMessage("productid.error.message",null, Locale.JAPAN);
                 model.addAttribute("errorMessage", errorMessage);
-//                System.out.println(3);
                 return "insert";
             }
         }
@@ -145,5 +150,53 @@ public class ProductController {
         return "logout";
     }
 
+    @GetMapping("/detail/{pId}")
+    public  String detail(@PathVariable("pId") int productId, Model model ){
+        if(session.getAttribute("user")==null) return "redirect:/index";
+        model.addAttribute("productId", pgProductService.findById(productId));
+        return "detail";
+    }
+
+    @PostMapping("/delete/{pId}")
+    public String delete(@PathVariable("pId") int productId, Model model ){
+        if(session.getAttribute("user")==null) return "redirect:/index";
+
+        try {
+            model.addAttribute("productId", pgProductService.findById(productId));
+            pgProductService.delete(productId);
+            successMessage = "削除に成功しました";
+            return "redirect:/menu";
+        }catch (ProductNotFoundException e){
+            String deleteError = "削除に失敗しました";
+            model.addAttribute("deleteError", deleteError);
+            return "redirect:/detail/{pId}";
+        }
+    }
+
+    @GetMapping("/updateInput/{pId}")
+    public  String update(@PathVariable("pId") int productId, @ModelAttribute("updateProductForm") UpdateProductForm updateProductForm, Model model ){
+        try {
+            if (session.getAttribute("user") == null) return "redirect:/index";
+            model.addAttribute("categoriesList", pgCategoriesService.findAll());
+            model.addAttribute("productId", pgProductService.findById(productId));
+            ProductRecord productRecord = pgProductService.findById(productId);
+            int category_id = pgCategoriesService.findIdByName(productRecord.name()).id();
+            model.addAttribute("category_id", category_id);
+            updateProductForm.setUpdateProductId(productRecord.product_id());
+            updateProductForm.setUpdateProductName(productRecord.name());
+            updateProductForm.setUpdateProductPrice(String.valueOf(productRecord.price()));
+            updateProductForm.setUpdateDescription(productRecord.description());
+            return "updateInput";
+        }catch (RuntimeException e){
+            return "detail";
+        }
+    }
+
+//    @GetMapping("/updateInput")
+//    public  String update( Model model ){
+//        if(session.getAttribute("user")==null) return "redirect:/index";
+//
+//        return "updateInput";
+//    }
 
 }

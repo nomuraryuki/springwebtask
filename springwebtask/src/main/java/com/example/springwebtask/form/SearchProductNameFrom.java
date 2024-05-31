@@ -7,4 +7,6 @@ public class SearchProductNameFrom {
 
 
     private String searchName;
+
+    private String searchMessage;
 }

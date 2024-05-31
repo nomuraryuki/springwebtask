@@ -24,7 +24,8 @@ public class PgProductDao implements ProductDao{
     public ProductRecord findById(int id) {
         var param = new MapSqlParameterSource();
         param.addValue("id", id);
-        var list = jdbcTemplate.query("SELECT * FROM products WHERE id = :id", param, new DataClassRowMapper<>(ProductRecord.class));
+        var list = jdbcTemplate.query("SELECT products.id, product_id, categories.name AS category, products.name AS name, price, description FROM products JOIN categories ON category_id = categories.id WHERE products.id = :id ORDER BY products.id" ,
+                param, new DataClassRowMapper<>(ProductRecord.class));
         return list.isEmpty() ? null : list.get(0);
 
     }
@@ -76,7 +77,7 @@ public class PgProductDao implements ProductDao{
 
         var list = jdbcTemplate.query("SELECT products.id, product_id, categories.name AS category, products.name AS name, price, description FROM products JOIN categories ON category_id = categories.id WHERE products.name LIKE :name ORDER BY id;", param
             ,new DataClassRowMapper<>(ProductRecord.class));
-        System.out.println(list);
+
         return list.isEmpty() ? null : list;
     }
 }
