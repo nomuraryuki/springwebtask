@@ -8,10 +8,7 @@ import com.example.springwebtask.form.LoginUserForm;
 
 import com.example.springwebtask.form.SearchProductNameFrom;
 import com.example.springwebtask.form.UpdateProductForm;
-import com.example.springwebtask.record.InsertProduct;
-import com.example.springwebtask.record.ProductRecord;
-import com.example.springwebtask.record.SessionUserRecord;
-import com.example.springwebtask.record.UserRecord;
+import com.example.springwebtask.record.*;
 import com.example.springwebtask.service.PgCategoriesService;
 import com.example.springwebtask.service.PgProductService;
 import com.example.springwebtask.service.PgUserService;
@@ -44,6 +41,8 @@ public class ProductController {
     private MessageSource messageSource;
 
     private  String successMessage;
+
+    private String updateProductId;
 
     @GetMapping("/index")
     public String index(@ModelAttribute("loginUserForm") LoginUserForm loginUserForm){
@@ -89,22 +88,28 @@ public class ProductController {
 
     @GetMapping("/menu/search")
     public String searchName(@RequestParam(name="searchName") String name,@ModelAttribute("SearchProductNameFrom") SearchProductNameFrom searchProductNameFrom, Model model){
-
+        successMessage="";
         if(session.getAttribute("user")==null) return "redirect:/index";
 
         else {
+            try {
+                name = searchProductNameFrom.getSearchName();
 
-            name = searchProductNameFrom.getSearchName();
+                model.addAttribute("productList", pgProductService.searchName(name));
+                model.addAttribute("countDB", pgProductService.searchName(name).size());
+                return "/menu";
+            }catch (NullPointerException e){
+                successMessage="'"+name+"'"+"に該当する検索結果がありませんでした";
+                return "redirect:/menu";
+            }
 
-            model.addAttribute("productList", pgProductService.searchName(name));
-            model.addAttribute("countDB", pgProductService.searchName(name).size());
-            return "/menu";
         }
 
     }
 
     @GetMapping("/insert")
     public String insert_product(@ModelAttribute("addProductForm") AddProductForm addProductForm, Model model){
+        successMessage="";
         if(session.getAttribute("user")==null) return "redirect:/index";
         else {
             model.addAttribute("categoriesList", pgCategoriesService.findAll());
@@ -122,14 +127,15 @@ public class ProductController {
         }
         else{
 
-            var product_id = addProductForm.getAddProductPid();
             var name = addProductForm.getAddProductName();
             var price = Integer.parseInt(addProductForm.getAddProductPrice());
             var description = addProductForm.getAddProductDescription();
             var Cid = Integer.parseInt(addProductForm.getAddProductCid());
-            var insertProduct = new InsertProduct(product_id,Cid,name,price,description);
+            var product_id = addProductForm.getAddProductPid();
+
 
             try {
+                var insertProduct = new InsertProduct(product_id,Cid,name,price,description);
                 pgProductService.insert(insertProduct);
                 successMessage = "登録が完了しました";
 //                System.out.println(successMessage);
@@ -151,52 +157,88 @@ public class ProductController {
     }
 
     @GetMapping("/detail/{pId}")
-    public  String detail(@PathVariable("pId") int productId, Model model ){
+    public  String detail(@PathVariable("pId") int pId, Model model ){
+        successMessage="";
         if(session.getAttribute("user")==null) return "redirect:/index";
-        model.addAttribute("productId", pgProductService.findById(productId));
+        model.addAttribute("productId", pgProductService.findById(pId));
         return "detail";
     }
 
     @PostMapping("/delete/{pId}")
-    public String delete(@PathVariable("pId") int productId, Model model ){
+    public String delete(@PathVariable("pId") int pId, Model model ){
         if(session.getAttribute("user")==null) return "redirect:/index";
 
         try {
-            model.addAttribute("productId", pgProductService.findById(productId));
-            pgProductService.delete(productId);
+            model.addAttribute("productId", pgProductService.findById(pId));
+            pgProductService.delete(pId);
             successMessage = "削除に成功しました";
             return "redirect:/menu";
-        }catch (ProductNotFoundException e){
-            String deleteError = "削除に失敗しました";
-            model.addAttribute("deleteError", deleteError);
-            return "redirect:/detail/{pId}";
+        }catch (Exception e){
+            successMessage = "削除に失敗しました";
+//            return "redirect:/detail/{pId}";
+            return "redirect:/menu";
         }
     }
 
     @GetMapping("/updateInput/{pId}")
-    public  String update(@PathVariable("pId") int productId, @ModelAttribute("updateProductForm") UpdateProductForm updateProductForm, Model model ){
+    public  String updateGet(@PathVariable("pId") int pId, @ModelAttribute("updateProductForm") UpdateProductForm updateProductForm, Model model ){
         try {
+            updateProductId="";
             if (session.getAttribute("user") == null) return "redirect:/index";
             model.addAttribute("categoriesList", pgCategoriesService.findAll());
-            model.addAttribute("productId", pgProductService.findById(productId));
-            ProductRecord productRecord = pgProductService.findById(productId);
-            int category_id = pgCategoriesService.findIdByName(productRecord.name()).id();
-            model.addAttribute("category_id", category_id);
+            model.addAttribute("productId", pgProductService.findById(pId));
+            ProductRecord productRecord = pgProductService.findById(pId);
+            CategoriesRecord category_id = pgCategoriesService.findIdByName(productRecord.category());
+            updateProductForm.setUpdateCategoryId(String.valueOf(category_id.id()));
             updateProductForm.setUpdateProductId(productRecord.product_id());
             updateProductForm.setUpdateProductName(productRecord.name());
             updateProductForm.setUpdateProductPrice(String.valueOf(productRecord.price()));
             updateProductForm.setUpdateDescription(productRecord.description());
+            updateProductId=productRecord.product_id();
             return "updateInput";
         }catch (RuntimeException e){
-            return "detail";
+            return "updateInput";
         }
     }
 
-//    @GetMapping("/updateInput")
-//    public  String update( Model model ){
-//        if(session.getAttribute("user")==null) return "redirect:/index";
-//
-//        return "updateInput";
-//    }
+    @PostMapping("/updateInput/{pId}")
+    public String updatePost(@Validated @ModelAttribute("updateProductForm") UpdateProductForm updateProductForm,BindingResult bindingResult,@PathVariable("pId") int pId, Model model){
+        if(bindingResult.hasErrors()) {
+            model.addAttribute("categoriesList", pgCategoriesService.findAll());
+            model.addAttribute("productId", pgProductService.findById(pId));
+            String errorUpdateMessage = messageSource.getMessage("update.product.error.message",null, Locale.JAPAN);
+            model.addAttribute("errorUpdateMessage", errorUpdateMessage);
+            return "updateInput";
+        }
 
+        else if(session.getAttribute("user")==null) return "redirect:/index";
+
+        else{
+            model.addAttribute("categoriesList", pgCategoriesService.findAll());
+            var product_id = updateProductForm.getUpdateProductId();
+            var name = updateProductForm.getUpdateProductName();
+            var price = Integer.parseInt(updateProductForm.getUpdateProductPrice());
+            var description = updateProductForm.getUpdateDescription();
+            var Cid = Integer.parseInt(updateProductForm.getUpdateCategoryId());
+            var updateProduct = new UpdateProductRecord(pId,product_id,Cid,name,price,description);
+            var sufferProductId = pgProductService.findProductIdSuffer(product_id);
+
+                if (sufferProductId==null || updateProductId.equals(product_id)) {
+                    pgProductService.update(updateProduct);
+                    successMessage = "更新が完了しました";
+                    return "redirect:/menu";
+                }else {
+                    model.addAttribute("productId", pgProductService.findById(pId));
+                    String errorMessage = messageSource.getMessage("productid.error.message",null, Locale.JAPAN);
+                    model.addAttribute("errorMessage", errorMessage);
+                    String errorUpdateMessage = messageSource.getMessage("update.product.error.message",null, Locale.JAPAN);
+                    model.addAttribute("errorUpdateMessage", errorUpdateMessage);
+                    return "updateInput";
+                }
+        }
+    }
+//    @GetMapping("success")
+//    public String success(@ModelAttribute("loginForm") LoginUserForm loginUserForm){
+//        return "success";
+//    }
 }

@@ -4,6 +4,7 @@ import com.example.springwebtask.Exception.ProductDuplicationIdException;
 import com.example.springwebtask.Exception.ProductNotFoundException;
 import com.example.springwebtask.record.InsertProduct;
 import com.example.springwebtask.record.ProductRecord;
+import com.example.springwebtask.record.UpdateProductRecord;
 import com.example.springwebtask.repository.ProductDao;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,8 +39,8 @@ public class PgProductService implements ProductService {
     }
 
     @Override
-    public int update(ProductRecord productRecord) {
-        return productDao.update(productRecord);
+    public int update(UpdateProductRecord updateProductRecord) {
+        return productDao.update(updateProductRecord);
     }
 
     @Override
@@ -49,4 +50,7 @@ public class PgProductService implements ProductService {
 
     @Override
     public List<ProductRecord> searchName(String name){return productDao.searchName(name);}
+
+    @Override
+    public ProductRecord findProductIdSuffer(String product_id){return productDao.findProductIdSuffer(product_id);}
 }

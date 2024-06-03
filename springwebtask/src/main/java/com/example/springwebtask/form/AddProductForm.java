@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.Range;
 @Data
 public class AddProductForm {
 
-    @NotEmpty
+    @NotEmpty(message = "{Product.ProductId.Null}")
     @Pattern(regexp="[0-9]{5}", message = "{Product.Pid.pattern}")
     private String addProductPid;
 

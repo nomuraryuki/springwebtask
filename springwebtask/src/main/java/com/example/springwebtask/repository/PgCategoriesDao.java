@@ -28,7 +28,7 @@ public class PgCategoriesDao implements CategoriesDao{
     public CategoriesRecord findIdByName(String name){
         var param = new MapSqlParameterSource();
         param.addValue("name", name);
-        var list = jdbcTemplate.query("SELECT id FROM categories WHERE name = :name" ,
+        var list = jdbcTemplate.query("SELECT * FROM categories WHERE name = :name" ,
                 param, new DataClassRowMapper<>(CategoriesRecord.class));;
         return list.isEmpty() ? null : list.get(0);
     }

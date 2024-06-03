@@ -2,6 +2,7 @@ package com.example.springwebtask.repository;
 
 import com.example.springwebtask.record.InsertProduct;
 import com.example.springwebtask.record.ProductRecord;
+import com.example.springwebtask.record.UpdateProductRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -50,14 +51,16 @@ public class PgProductDao implements ProductDao{
     }
 
     @Override
-    public int update(ProductRecord productRecord){
+    public int update(UpdateProductRecord updateProductRecord){
         var param = new MapSqlParameterSource();
 
-        param.addValue("id", productRecord.product_id());
-        param.addValue("name", productRecord.name());
-        param.addValue("price", productRecord.price());
-
-        return jdbcTemplate.update("UPDATE products SET name = :name, price = :price WHERE id = :id", param);
+        param.addValue("id", updateProductRecord.id());
+        param.addValue("product_id", updateProductRecord.product_id());
+        param.addValue("category_id", updateProductRecord.category_id());
+        param.addValue("name", updateProductRecord.name());
+        param.addValue("price", updateProductRecord.price());
+        param.addValue("description", updateProductRecord.description());
+        return jdbcTemplate.update("UPDATE products SET product_id = :product_id,category_id = :category_id,name = :name, price = :price,description=:description WHERE id = :id", param);
     }
 
     @Override
@@ -79,5 +82,15 @@ public class PgProductDao implements ProductDao{
             ,new DataClassRowMapper<>(ProductRecord.class));
 
         return list.isEmpty() ? null : list;
+    }
+
+    @Override
+    public  ProductRecord findProductIdSuffer(String product_id){
+        var param = new MapSqlParameterSource();
+        param.addValue("product_id", product_id);
+        var list = jdbcTemplate.query("SELECT products.id, product_id, categories.name AS category, products.name AS name, price, description FROM products JOIN categories ON category_id = categories.id WHERE product_id = :product_id ORDER BY products.id" ,
+                param, new DataClassRowMapper<>(ProductRecord.class));
+        return list.isEmpty() ? null : list.get(0);
+
     }
 }

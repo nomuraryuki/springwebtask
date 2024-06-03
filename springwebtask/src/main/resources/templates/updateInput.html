@@ -12,9 +12,9 @@
 
   <div class="insert">
     <div class="form-body">
-      <p class="error">エラーメッセージ</p>
+      <p class="error" th:text="${errorUpdateMessage}"></p>
 
-      <form action="menu.html" method="get" th:object="${updateProductForm}">
+      <form th:action="@{/updateInput/{pId}(pId=${productId.id()})}" method="post" th:object="${updateProductForm}">
         <fieldset class="label-130">
           <div>
             <label>商品ID</label>
@@ -22,6 +22,7 @@
             <div class="error" th:each="error: ${#fields.errors('updateProductId')}">
               [[ ${error} ]]
             </div>
+            <p class="error">[[ ${errorMessage} ]]</p>
           </div>
           <div>
             <label>商品名</label>
@@ -39,12 +40,10 @@
           </div>
           <div>
             <label>カテゴリ</label>
-            <select th:field="*{updateCategoryId}" name="categoryId" class="base-text"/>
+            <select th:field="*{updateCategoryId}" name="categoryId" class="base-text">
               <option th:each="categories : ${categoriesList}" th:value="${categories.id}" th:text="${categories.name}"></option>
-<!--            </select>-->
-<!--            <select th:field="*{updateCategoryId}"  name="categoryId" class="base-text">-->
-<!--              <option th:each="categories : ${categoriesList}" th:value="${categories.id}" th:text="${categories.name}" ></option>-->
-<!--            </select>-->
+            </select>
+
           </div>
           <div>
             <label>商品説明</label>
@@ -55,16 +54,17 @@
             <label>画像</label>
             <input type="file" name="file">
             <span class="error">エラーメッセージ</span>
+
           </div>
         </fieldset>
           <div class="btns">
             <button type="button" onclick="openModal()" class="basic-btn">更新</button>
-            <input type="button" onclick="location.href='./menu.html'" value="メニューに戻る" class="cancel-btn">
+            <input type="button" onclick="location.href='/menu'" value="メニューに戻る" class="cancel-btn">
           </div>
           <div id="modal">
             <p class="modal-message">更新しますか？</p>
             <div class="btns">
-              <button type="button" id="update-btn" class="basic-btn">更新</button>
+              <button type="submit" id="update-btn" class="basic-btn">更新</button>
               <button type="button" onclick="closeModal()" class="cancel-btn">キャンセル</button>
             </div>
           </div>
@@ -72,11 +72,11 @@
     </div>
   </div>
   <div id="fadeLayer"></div>
-  <script src="./js/commons.js"></script>
+  <script src="/js/commons.js"></script>
   <script>
     'use strict'
     document.getElementById('update-btn').addEventListener('click', () => {
-      location.href = './menu.html'
+      location.href = './menu'
     })
   </script>
 </body>
